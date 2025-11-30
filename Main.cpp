@@ -12,8 +12,8 @@ const int MAPHEIGHT = 30;
 const int MAPLENGHT = 80;
 char map[MAPHEIGHT][MAPLENGHT];
 
-int px = MAPHEIGHT-2;
-int py = MAPLENGHT/2;
+unsigned px = MAPHEIGHT-1;
+unsigned py = MAPLENGHT/2;
 
 void GenerateUi(){
     int HP = 5;
@@ -25,7 +25,7 @@ void GenerateUi(){
             cout << "O-";
             }
         }
-    cout << "       (a/d - Move, w - Jump, Double Jump, i/j/k/l - Attack)";
+    printf("       (a/d - Move, w - Jump, Double Jump, i/j/k/l - Attack) \n");
 
 }
 
@@ -39,8 +39,6 @@ void FillMap(){
         for(int j = 0; j < MAPLENGHT; j++){
             if(i == 0 || i == MAPHEIGHT-1 || j == 0 || j == MAPLENGHT-1){
                 map[i][j] = '#';
-            }else if(i == px && j == py){
-                GeneratePlayer();
             }else{
                 map[i][j] = ' ';
             }
@@ -51,9 +49,9 @@ void FillMap(){
 void GenerateMap(){
     for(int i = 0; i < MAPHEIGHT; i++){
         for(int j = 0; j < MAPLENGHT; j++){
-            cout << map[i][j];
+            printf("%c", map[i][j]);
         }
-        cout << endl;
+        printf("\n");
     }
 }
 
@@ -62,7 +60,7 @@ void Movement(char input){
     int NewY = py;
 
     if(input == 'w'){
-        NewX--;
+        NewX -= 2;
     }else if(input == 's'){
         NewX++;
     }else if(input == 'a'){
@@ -76,23 +74,21 @@ void Movement(char input){
     }
     //Move Player
     map[px][py] = ' ';
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {(short)py, (short)px});
+    cout << " ";
     px = NewX;
     py = NewY;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {(short)py, (short)px});
     map[px][py] = '@';
+    cout << "@";
 }
 int main() {
     GenerateUi();
-    cout << endl;
     FillMap();
     GenerateMap();
     while(true){
         char key = _getch();
         Movement(key);
-        system("cls");
-        GenerateUi();
-        cout << endl;
-        FillMap();
-        GenerateMap();
     }
     return 0;
 }
