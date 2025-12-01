@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run in CMD (stay open)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "C:\\Windows\\System32\\cmd.exe",
+            "args": [
+                "/c",
+                "\"${workspaceFolder}\\${fileBasenameNoExtension}.exe\"",
+                "&&",
+                "pause"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "preLaunchTask": "build"
+        }
+    ]
+}

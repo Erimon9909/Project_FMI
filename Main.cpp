@@ -89,6 +89,7 @@ int main() {
     while(true){
         char key = _getch();
         Movement(key);
+
     }
     return 0;
 }
