@@ -67,8 +67,8 @@ void GeneratePlatform(int row, int startCol, int length){
 }
 
 void GeneratePlatforms() {
-    const int minLen = 5;
-    const int maxLen = 15;
+    int minLen = 5;
+    int maxLen = 15;
 
     // Fixed rows
     int rows[5] = {17, 15, 6, 5, 4}; // bottom to top
