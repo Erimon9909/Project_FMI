@@ -8,9 +8,7 @@
             "program": "C:\\Windows\\System32\\cmd.exe",
             "args": [
                 "/c",
-                "\"${workspaceFolder}\\${fileBasenameNoExtension}.exe\"",
-                "&&",
-                "pause"
+                "\"${workspaceFolder}\\${fileBasenameNoExtension}.exe && pause\""
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
