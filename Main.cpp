@@ -554,6 +554,11 @@ void updateWave(){
 }
 
 int main(){
+    //I want 2 number 9's, a number 9 large,
+    //a number 6 with extra dip,
+    //a number 7,
+    //2 number 45's, one with cheese
+    //and a large soda
     srand((unsigned)time(0));
     generateMap();
     printMap();
