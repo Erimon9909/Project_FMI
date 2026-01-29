@@ -611,7 +611,7 @@ int main() {
     //I want 2 number 9's
     //A number 9 large
     //A number 6 with extra dip, 
-    // number 7,
+    //A number 7,
     //2 number 45's
     //One with cheese
     //And a large soda
