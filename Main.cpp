@@ -35,6 +35,7 @@ const double INVINCIBLE_DURATION = 1.5;
 
 char map[MAPHEIGHT][MAPLENGHT];
 clock_t lastFrameTime;
+int enemiesCount = 5;
 int jumpCount = 0;
 int currentWave = 1;
 bool waveActive = false;
@@ -59,7 +60,7 @@ struct enemy {
     double timer;
 };
 
-std::vector<enemy> enemies;
+int* enemies = new int[enemiesCount];
 
 void damageEnemies(int ax, int ay);
 
@@ -109,6 +110,18 @@ void drawEnemy(enemy& e) {
     }
 
     setColor(7);
+}
+
+void reSize(int* arr, size_t size) {
+    int* arr2 = new int[size];
+    for (int i = 0; i < size; i++) {
+        arr2[i] = arr[i];
+    }
+    arr = new int[size * 2];
+    for (int i = 0; i < size; i++) {
+        arr[i] = arr2[i];
+    }
+    delete[] arr2;
 }
 
 int randRange(int min, int max) {
@@ -224,7 +237,7 @@ void movement(char input) {
     int nextX = p.x;
     int nextY = p.y;
 
-    
+
     if (input == 'a') nextY--;
     if (input == 'd') nextY++;
 
@@ -251,10 +264,10 @@ void movement(char input) {
             nextY = p.y;
         }
         else if (isEmpty(p.x, nextY)) {
-            nextX = p.x; 
+            nextX = p.x;
         }
         else {
-            return; 
+            return;
         }
     }
 
