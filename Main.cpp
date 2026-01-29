@@ -27,7 +27,7 @@ const int MAX_JUMPS = 2;
 const int UI_HEIGHT = 1;
 const int MAPHEIGHT = 20;
 const int MAPLENGHT = 95;
-const double ENEMY_MOVE_DELAY = 0.45;
+const double ENEMY_MOVE_DELAY = 0.25;
 const int MAX_WAVES = 5;
 const int TARGET_FPS = 60;
 const double FRAME_TIME = 1.0 / TARGET_FPS;
@@ -221,34 +221,49 @@ void printMap() {
 }
 
 void movement(char input) {
-    int NewX = p.x;
-    int NewY = p.y;
+    int nextX = p.x;
+    int nextY = p.y;
 
-    if (input == 'a') {
-        NewY--;
-    }
-
-    if (input == 'd') {
-        NewY++;
-    }
+    
+    if (input == 'a') nextY--;
+    if (input == 'd') nextY++;
 
     if (input == 'w' && jumpCount < MAX_JUMPS) {
-        NewX -= 2;
-        jumpCount++;
+        int successfulSteps = 0;
+        for (int i = 1; i <= 3; i++) {
+            if (isEmpty(p.x - i, p.y)) {
+                successfulSteps = i;
+            }
+            else {
+                break;
+            }
+        }
+        if (successfulSteps > 0) {
+            nextX = p.x - successfulSteps;
+            jumpCount++;
+        }
     }
 
-    if (input == 's') {
-        NewX++;
-    }
+    if (input == 's') nextX++;
 
-    if (!isEmpty(NewX, NewY)) {
-        return;
+    if (!isEmpty(nextX, nextY)) {
+        if (isEmpty(nextX, p.y)) {
+            nextY = p.y;
+        }
+        else if (isEmpty(p.x, nextY)) {
+            nextX = p.x; 
+        }
+        else {
+            return; 
+        }
     }
 
     drawAt(p.x, p.y, ' ');
     map[p.x][p.y] = ' ';
-    p.x = NewX;
-    p.y = NewY;
+
+    p.x = nextX;
+    p.y = nextY;
+
     map[p.x][p.y] = '@';
     setColor(15);
     drawAt(p.x, p.y, '@');
@@ -445,31 +460,36 @@ void updateEnemies(double dt) {
             continue;
         }
 
+        int nextEx = e.x;
+        int nextEy = e.y;
+
         if (e.type == WALKER) {
-            updateWalker(e);
+            int dir = e.dir;
+            if (isSolid(e.x, e.y + dir) || isEmpty(e.x + 1, e.y + dir)) dir *= -1;
+            nextEy += dir;
         }
         else if (e.type == FLYER) {
-            updateFlyer(e);
+            if (p.y < e.y) nextEy--; else if (p.y > e.y) nextEy++;
+            if (abs(p.y - e.y) < 6) { if (e.x < p.x) nextEx++; else if (e.x > p.x) nextEx--; }
         }
-        else if (e.type == CRAWLER) {
-            updateCrawler(e);
-        }
-        else if (e.type == JUMPER) {
-            updateJumper(e);
-        }
-        else if (e.type == BOSS) {
-            updateBoss(e);
-        }
+        if (e.type == WALKER) updateWalker(e);
+        else if (e.type == FLYER) updateFlyer(e);
+        else if (e.type == CRAWLER) updateCrawler(e);
+        else if (e.type == JUMPER) updateJumper(e);
+        else if (e.type == BOSS) updateBoss(e);
 
+        bool hit = false;
         if (e.type == BOSS) {
-            if (p.x >= e.x - 1 && p.x <= e.x + 1 && p.y >= e.y - 1 && p.y <= e.y + 1) {
-                playerTakeDamage();
-            }
+            if (p.x >= e.x - 1 && p.x <= e.x + 1 && p.y >= e.y - 1 && p.y <= e.y + 1) hit = true;
         }
         else {
-            if (e.x == p.x && e.y == p.y) {
-                playerTakeDamage();
+            if ((e.x == p.x && e.y == p.y) || (nextEx == p.x && nextEy == p.y)) {
+                hit = true;
             }
+        }
+
+        if (hit) {
+            playerTakeDamage();
         }
 
         e.timer = 0;
@@ -584,11 +604,14 @@ void updateWave() {
     if (currentWave > MAX_WAVES) {
         system("cls");
         cout << "VICTORY!";
-        exit(0);
     }
 }
 
 int main() {
+    //I want 2 number 9's, a number 9 large,
+    //A number 6, 2 number 45's
+    //One with cheese
+    //And a large soda
     srand((unsigned)time(0));
     generateMap();
     printMap();
@@ -606,28 +629,70 @@ int main() {
         lastFrameTime = now;
         updateWave();
 
-        if (_kbhit()) {
-            char k = _getch();
+        int moveX = 0;
+        int moveY = 0;
 
-            if (attacking && (k == 'a' || k == 's' || k == 'd' || k == 'w')) {
-                clearAttack();
-                attacking = false;
+        if (GetAsyncKeyState('A') & 0x8000) moveY = -1;
+        if (GetAsyncKeyState('D') & 0x8000) moveY = 1;
+
+        static bool wWasDown = false;
+        bool wIsDown = (GetAsyncKeyState('W') & 0x8000);
+
+        if (wIsDown && !wWasDown && jumpCount < MAX_JUMPS) {
+            int successfulSteps = 0;
+            for (int i = 1; i <= 3; i++) {
+                if (isEmpty(p.x - i, p.y)) successfulSteps = i;
+                else break;
             }
-
-            movement(k);
-            attack(k);
+            if (successfulSteps > 0) {
+                moveX = -successfulSteps;
+                jumpCount++;
+            }
         }
+        wWasDown = wIsDown;
 
         gTimer += dt;
         if (gTimer >= 0.15) {
             if (isEmpty(p.x + 1, p.y)) {
-                if (attacking) clearAttack();
-                movement('s');
+                moveX = 1;
             }
             else {
                 jumpCount = 0;
             }
             gTimer = 0;
+        }
+
+        if (moveX != 0 || moveY != 0) {
+            int nextX = p.x + moveX;
+            int nextY = p.y + moveY;
+
+            if (!isEmpty(nextX, nextY)) {
+                if (isEmpty(nextX, p.y)) nextY = p.y;
+                else if (isEmpty(p.x, nextY)) nextX = p.x;
+                else { nextX = p.x; nextY = p.y; }
+            }
+
+            if (nextX != p.x || nextY != p.y) {
+                if (attacking) {
+                    clearAttack();
+                    attacking = false;
+                    attackTimer = 0;
+                }
+
+                drawAt(p.x, p.y, ' ');
+                map[p.x][p.y] = ' ';
+                p.x = nextX;
+                p.y = nextY;
+                map[p.x][p.y] = '@';
+                setColor(15);
+                drawAt(p.x, p.y, '@');
+                setColor(7);
+            }
+        }
+
+        if (_kbhit()) {
+            char k = _getch();
+            attack(k);
         }
 
         if (invincibleTimer > 0) {
@@ -639,7 +704,6 @@ int main() {
             else {
                 drawAt(p.x, p.y, ' ');
             }
-
             if (invincibleTimer <= 0) {
                 invincibleTimer = 0;
                 setColor(15);
@@ -658,6 +722,5 @@ int main() {
 
         updateEnemies(dt);
     }
-
     return 0;
 }
