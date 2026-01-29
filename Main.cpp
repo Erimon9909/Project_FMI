@@ -1,3 +1,18 @@
+/**
+*
+* Solution to course project # 10
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2025/2026
+*
+* @author Borislav Sugarev
+* @idnumber 6MI0600690
+* @compiler gpp
+*
+* Implements an ASCII combat game.
+*
+*/
+
 #include <iostream>
 #include <ctime>
 #include <conio.h>
